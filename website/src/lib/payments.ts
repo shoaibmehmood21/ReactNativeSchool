@@ -100,12 +100,17 @@ export function createOrder(
 export async function submitOrder(order: Order): Promise<boolean> {
   if (!site.orderWebhookUrl) return false;
   try {
+    // Sent as text/plain so the browser skips the CORS preflight, which Google
+    // Apps Script (and many webhook services) don't answer. The body is JSON.
     const response = await fetch(site.orderWebhookUrl, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
       body: JSON.stringify(order),
     });
-    return response.ok;
+    if (!response.ok) return false;
+    const result = (await response.json().catch(() => null)) as { ok?: boolean } | null;
+    // Apps Script always answers 200; it reports failures in the body.
+    return result?.ok !== false;
   } catch {
     return false;
   }

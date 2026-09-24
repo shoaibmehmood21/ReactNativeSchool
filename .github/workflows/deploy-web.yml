@@ -22,6 +22,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       BASE_PATH: /${{ github.event.repository.name }}
+      # Optional: Settings → Secrets and variables → Actions → Variables.
+      NEXT_PUBLIC_ORDER_WEBHOOK_URL: ${{ vars.ORDER_WEBHOOK_URL }}
       NEXT_TELEMETRY_DISABLED: 1
     steps:
       - uses: actions/checkout@v4

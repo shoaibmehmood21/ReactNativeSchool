@@ -45,6 +45,8 @@ export function Checkout() {
   const [submitting, setSubmitting] = useState(false);
   const [order, setOrder] = useState<Order | null>(null);
   const [delivered, setDelivered] = useState(false);
+  // Hidden from people; bots that fill every field reveal themselves here.
+  const [trap, setTrap] = useState("");
 
   const amount = planAmount(plan, billing);
   const isPaid = amount > 0;
@@ -58,7 +60,7 @@ export function Checkout() {
     e.preventDefault();
     setSubmitting(true);
     const next = createOrder(plan, billing, paymentMethod, details);
-    setDelivered(await submitOrder(next));
+    setDelivered(trap ? true : await submitOrder(next));
     setOrder(next);
     setSubmitting(false);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -125,6 +127,12 @@ export function Checkout() {
             <legend className="sr-only">School details</legend>
             <h2 className="text-lg font-semibold">2. Your school</h2>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <div aria-hidden className="absolute -left-[9999px]">
+                <label>
+                  Website
+                  <input tabIndex={-1} autoComplete="off" value={trap} onChange={(e) => setTrap(e.target.value)} />
+                </label>
+              </div>
               <Field label="School name" className="sm:col-span-2">
                 <input required className={inputClass} value={details.schoolName} onChange={update("schoolName")} autoComplete="organization" />
               </Field>
@@ -252,7 +260,7 @@ function Confirmation({ order, delivered, onBack }: { order: Order; delivered: b
         </h1>
         <p className="mt-3 text-lg text-slate-600">
           {isPaid
-            ? "Transfer the amount below, then email us your payment slip. We'll activate your school once it's verified."
+            ? `${delivered ? "We've received your order. " : ""}Transfer the amount below, then email us your payment slip. We'll activate your school once it's verified.`
             : delivered
               ? `Thanks, ${order.school.contactName}. We'll be in touch at ${order.school.email} shortly.`
               : "Send us your details by email and we'll get your school set up."}

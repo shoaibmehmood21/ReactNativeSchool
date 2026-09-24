@@ -85,7 +85,7 @@ EXPO_PUBLIC_API_URL=https://api.yourschool.edu/parent-app
 
 **How payment works today:** the customer picks a plan and fills in their school details. They then get an order reference like `SC-260924-AB12`, your bank details, and an "Email payment slip" button that opens their email app with the order already filled in. You verify the transfer and set up the school.
 
-**To collect orders automatically:** set `NEXT_PUBLIC_ORDER_WEBHOOK_URL` to an endpoint that accepts the order as JSON, such as a Google Apps Script, a Zapier/Make webhook or your own API. Until then, nothing is stored on a server: you receive an order only when the customer sends the email.
+**Recording orders in a Google Sheet:** follow [`website/integrations/google-sheets/README.md`](website/integrations/google-sheets/README.md) (about 5 minutes). Each order becomes a row and you get an email for it. The website sends orders to whatever URL is in the `ORDER_WEBHOOK_URL` repository variable, so a Zapier/Make webhook or your own API works too. Until that's set, you only hear about an order when the customer sends the email.
 
 **Adding card payments later:** add the provider's checkout in [`website/src/lib/payments.ts`](website/src/lib/payments.ts) and mark the `card` method `available: true`.
 
