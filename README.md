@@ -13,6 +13,12 @@ Built with **Expo SDK 57**, React Native 0.86, Expo Router and TypeScript.
 
 ## Try it
 
+### On any phone or browser (no install)
+
+Open **https://shoaibmehmood21.github.io/ReactNativeSchool/**. The site is republished automatically on every push by [`.github/workflows/deploy-web.yml`](.github/workflows/deploy-web.yml). If the link doesn't work yet, turn on **Settings → Pages → Source: GitHub Actions** once, then re-run that workflow.
+
+### On your computer
+
 ```bash
 npm install
 npm start          # scan the QR code with a development build, or press w for web
