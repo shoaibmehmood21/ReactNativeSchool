@@ -15,7 +15,10 @@ Built with **Expo SDK 57**, React Native 0.86, Expo Router and TypeScript.
 
 ### On any phone or browser (no install)
 
-Open **https://shoaibmehmood21.github.io/ReactNativeSchool/**. The site is republished automatically on every push by [`.github/workflows/deploy-web.yml`](.github/workflows/deploy-web.yml). If the link doesn't work yet, turn on **Settings → Pages → Source: GitHub Actions** once, then re-run that workflow.
+- **Website** (product, pricing, sign-up): **https://shoaibmehmood21.github.io/ReactNativeSchool/**
+- **Parent app demo:** **https://shoaibmehmood21.github.io/ReactNativeSchool/app/**
+
+Both are republished automatically on every push by [`.github/workflows/deploy-web.yml`](.github/workflows/deploy-web.yml).
 
 ### On your computer
 
@@ -69,6 +72,28 @@ EXPO_PUBLIC_API_URL=https://api.yourschool.edu/parent-app
 ```
 
 [`docs/API.md`](docs/API.md) describes the REST endpoints the backend needs to implement.
+
+## Marketing website and sign-up
+
+[`website/`](website) is a separate Next.js project: home page, pricing (Free / Basic / Enterprise, monthly or yearly), and a sign-up and checkout flow.
+
+**Edit [`website/src/config/site.ts`](website/src/config/site.ts) to change:**
+- plan names, prices, student limits and features, plus the comparison table and FAQ
+- the sales, billing and support email addresses (they're `example.com` placeholders now)
+- **bank transfer details** (sample values for now; set `isSample: false` once they're real)
+- currency (`USD` by default)
+
+**How payment works today:** the customer picks a plan and fills in their school details. They then get an order reference like `SC-260924-AB12`, your bank details, and an "Email payment slip" button that opens their email app with the order already filled in. You verify the transfer and set up the school.
+
+**To collect orders automatically:** set `NEXT_PUBLIC_ORDER_WEBHOOK_URL` to an endpoint that accepts the order as JSON, such as a Google Apps Script, a Zapier/Make webhook or your own API. Until then, nothing is stored on a server: you receive an order only when the customer sends the email.
+
+**Adding card payments later:** add the provider's checkout in [`website/src/lib/payments.ts`](website/src/lib/payments.ts) and mark the `card` method `available: true`.
+
+```bash
+cd website
+npm install
+npm run dev      # http://localhost:3000
+```
 
 ## Project layout
 

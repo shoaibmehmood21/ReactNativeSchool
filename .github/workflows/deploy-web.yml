@@ -1,8 +1,7 @@
-name: Deploy web app to GitHub Pages
+name: Deploy website to GitHub Pages
 
-# Publishes the app as a website so it can be tried from any phone or browser
-# without installing anything. One-time setup: Settings → Pages → Source:
-# "GitHub Actions".
+# Publishes the marketing website at /<repo>/ and the parent-app demo at
+# /<repo>/app/. One-time setup: Settings → Pages → Source: "GitHub Actions".
 on:
   push:
     branches: ['main', 'claude/school-parent-feedback-app-up0580']
@@ -21,26 +20,41 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      BASE_PATH: /${{ github.event.repository.name }}
+      NEXT_TELEMETRY_DISABLED: 1
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-      - run: npm ci
-      - name: Configure single-page web build under /<repo-name>
+          cache-dependency-path: |
+            package-lock.json
+            website/package-lock.json
+
+      - name: Build marketing website
+        working-directory: website
         run: |
-          jq --arg base "/${{ github.event.repository.name }}" \
+          npm ci
+          npx next build
+      - run: mv website/out site
+
+      - name: Build parent-app demo under /app
+        run: |
+          npm ci
+          jq --arg base "$BASE_PATH/app" \
             '.expo.web.output = "single" | .expo.experiments.baseUrl = $base' \
             app.json > app.pages.json
           mv app.pages.json app.json
-      - name: Export web build
-        run: npx expo export --platform web --output-dir dist
-      - name: Serve the app for deep links (e.g. /report/r1)
-        run: cp dist/index.html dist/404.html && touch dist/.nojekyll
+          npx expo export --platform web --output-dir site/app
+
+      # The website's 404 page sends refreshed demo URLs (e.g. /app/report/r1)
+      # back into the demo.
+      - run: touch site/.nojekyll
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: dist
+          path: site
 
   deploy:
     needs: build

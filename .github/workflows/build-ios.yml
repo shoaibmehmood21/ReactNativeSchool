@@ -6,7 +6,7 @@ on:
   push:
     tags: ['v*']
     branches: ['**']
-    paths-ignore: ['**.md', 'docs/**']
+    paths-ignore: ['**.md', 'docs/**', 'website/**']
   workflow_dispatch:
 
 permissions:

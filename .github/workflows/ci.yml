@@ -19,3 +19,23 @@ jobs:
       - run: npm run typecheck
       - name: Bundle JavaScript for Android and iOS
         run: npx expo export --platform android --platform ios --output-dir dist
+
+  website:
+    name: Website lint, typecheck & build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: website
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: website/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: 1
