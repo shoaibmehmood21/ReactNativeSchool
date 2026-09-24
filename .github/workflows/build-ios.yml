@@ -1,0 +1,54 @@
+name: Build iOS (simulator)
+
+# Produces an unsigned .app for the iOS Simulator. Installing on a real
+# iPhone needs Apple code signing — see README "iPhone builds".
+on:
+  push:
+    tags: ['v*']
+    branches: ['**']
+    paths-ignore: ['**.md', 'docs/**']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  simulator:
+    name: Simulator .app
+    runs-on: macos-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Generate native iOS project and install pods
+        run: npx expo prebuild --platform ios
+      - name: Build for iOS Simulator
+        run: |
+          WORKSPACE=$(ls -d ios/*.xcworkspace | head -1)
+          SCHEME=$(basename "$WORKSPACE" .xcworkspace)
+          xcodebuild \
+            -workspace "$WORKSPACE" \
+            -scheme "$SCHEME" \
+            -configuration Release \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath build \
+            -quiet \
+            CODE_SIGNING_ALLOWED=NO
+      - name: Zip .app
+        run: |
+          APP=$(ls -d build/Build/Products/Release-iphonesimulator/*.app | head -1)
+          ditto -c -k --keepParent "$APP" school-connect-ios-simulator.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: school-connect-ios-simulator
+          path: school-connect-ios-simulator.zip
+      - name: Attach to GitHub release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: school-connect-ios-simulator.zip
